@@ -3,6 +3,8 @@ import fs from 'fs-extra'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import safe from 'safe-await'
+import { markdownMagic } from 'markdown-magic'
+import { markdownTable } from 'markdown-table'
 
 // Add these lines at the top to define __dirname
 const __filename = fileURLToPath(import.meta.url)
@@ -15,6 +17,9 @@ const SLASH_REPLACEMENT = '___|___'
 const RAW_DATA_FOLDER = path.join(__dirname, 'data')
 const STARS_MD_FOLDER = path.join(__dirname, 'stars')
 const README_FILE = path.join(__dirname, 'README.md')
+
+const GITHUB_USERNAME = 'davidwells'
+
 if (!GITHUB_TOKEN) {
   throw new Error('GITHUB_TOKEN is not set')
 }
@@ -110,12 +115,14 @@ async function saveReadMe(repo, readme) {
   const starredAt = repo.starred_at || repo.repo.updated_at
   const repoPath = repoDetails.full_name
   const fileContent = `---
-project: ${repoDetails.name}
+repo: ${repoDetails.full_name}
+name: ${repoDetails.name}
+homepage: ${repoDetails.homepage || 'NA'}
+url: ${repoDetails.html_url}
 stars: ${repoDetails.stargazers_count}
 starredAt: ${starredAt}
 description: |-
     ${repoDetails.description}
-url: ${repoDetails.html_url}
 ---
 
 ${readme}
@@ -160,7 +167,7 @@ function cleanGithubRepo(data) {
  })
 }
 
-async function saveRepoData(repo) {
+async function saveRepoDataToJSON(repo) {
   const cleanedRepo = cleanGithubRepo(repo)
   const repoDetails = cleanedRepo.repo || cleanedRepo
   // await fs.ensureDir(`data/${repoDetails.owner.login}`)
@@ -207,14 +214,21 @@ async function getStarredRepos(username, page = 1) {
   }
 }
 
-async function getAllStars(username, startPage = 1, maxPages = 2, dataFiles = []) {
+async function getAllStars({ 
+  username,
+  startPage = 1,
+  // If not provided, will go until rate limit is reached
+  maxPages = Infinity,
+  delayPerPage = DELAY_PER_PAGE,
+  dataFiles = []
+}) {
   const perPage = 100
   const newStarsFound = []
   let page = startPage
   while (true) {
     console.log(`Getting page ${page}`)
     if (INITIAL_SEED === 'true' && page > 2) {
-      await delayForInitialLoad(DELAY_PER_PAGE)
+      await delayForInitialLoad(delayPerPage)
     }
     const { repos, pagination, rateLimit } = await getStarredRepos(username, page)    
     console.log(`Remaining calls: ${rateLimit.remaining} til ${rateLimit.resetTime}`)
@@ -281,14 +295,38 @@ function formatRepoName(fileName) {
   return fileName.replace('.json', '').replace(SLASH_REPLACEMENT, '/')
 }
 
-async function resetData() {
+async function resetJSONData() {
   await fs.remove(RAW_DATA_FOLDER)
 }
 
+async function resetMarkdownData() {
+  await fs.remove(STARS_MD_FOLDER)
+}
+
+async function fetchAllStarData(username) {
+  const repoFilePaths = await getSavedRepoFilePaths()
+  const alreadyProcessedRepoNames = repoFilePaths.map(formatRepoName)
+  const newStarsFound = await getAllStars({
+    username,
+    startPage: 1,
+    dataFiles: alreadyProcessedRepoNames,
+  })
+  return newStarsFound
+}
+
+async function fetchAndSaveAllJSONData(username) {
+  const starsFound = await fetchAllStarData(username)
+  const processFilesPromise = starsFound.map(async (repo) => {
+    return saveRepoDataToJSON(repo)
+  })
+  await Promise.all(processFilesPromise)
+}
+
 async function saveStars(username) {
-  /*
-  await resetData()
-  //process.exit(1)
+  /* // Clear everything
+  await resetJSONData()
+  await resetMarkdownData()
+  process.exit(1)
   /** */
 
   await fs.ensureDir(RAW_DATA_FOLDER)
@@ -302,7 +340,12 @@ async function saveStars(username) {
 
   let newStarsFound = []
   try {
-    newStarsFound = await getAllStars(username, 1, 2, alreadyProcessedRepoNames)
+    newStarsFound = await getAllStars({
+      username,
+      startPage: 1,
+      maxPages: 2,
+      dataFiles: alreadyProcessedRepoNames,
+    })
 
     if (newStarsFound.length === 0) {
       console.log('No new stars found, stopping here')
@@ -319,7 +362,7 @@ async function saveStars(username) {
 
       return Promise.all([
         saveReadMePromise,
-        saveRepoData(repo)
+        saveRepoDataToJSON(repo)
       ])
     })
 
@@ -355,15 +398,16 @@ async function saveStars(username) {
     
     const tableRows = sortedByStarredDate.map(({ repo, ...rest }) => {
       return [
-        `[${repo}](https://github.com/${repo})`,
-        numberWithCommas(rest.stars),
-        rest.starredAt,
+        `[${repo}](https://github.com/${repo})<br/>${rest.description}`,
+        formatDate(rest.starredAt),
+        // numberWithCommas(rest.stars),
       ]
     })
 
     console.log(tableRows)
+    fs.writeFileSync('table.md', JSON.stringify(tableRows, null, 2))
 
-    generateMarkdownTable(tableRows, sortedByStarredDate.length)
+    await generateMarkdownTable(tableRows, sortedByStarredDate.length)
     
   } catch (e) {
     console.error(`saveStars Error: ${e}`)
@@ -382,19 +426,36 @@ function generateMarkdownTable(tableRows, sum) {
   const config = {
     transforms: {
       ALL_STARS() {
-        return table([
-          ['Name', 'Stars', 'Starred At'],
+        return markdownTable([
+          ['Repo', 'Starred On'],
           ...tableRows,
         ])
       }
     }
   }
 
-  markdownMagic(README_FILE, config, d => {
-    console.log(`Updated total downloads ${sum}`)
+  return markdownMagic(README_FILE, config)
+}
+
+// Add this helper function for date formatting
+function formatDate(isoDate) {
+  const date = new Date(isoDate)
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric'
   })
 }
 
-saveStars('davidwells').then(() => {
-  console.log('done')
+// if (INITIAL_SEED === 'true') {
+
+// } else {
+//   saveStars(GITHUB_USERNAME).then(() => {
+//     console.log('script done')
+//   })
+// }
+
+
+fetchAndSaveAllJSONData(GITHUB_USERNAME).then(() => {
+  console.log('script done')
 })
