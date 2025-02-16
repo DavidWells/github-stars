@@ -2,17 +2,17 @@ import fs from 'fs-extra'
 import safe from 'safe-await'
 import { $fetch } from 'ofetch'
 import { delay } from './delay.js'
-import { INITIAL_SEED, DELAY_PER_PAGE, STARS_MD_FOLDER } from '../_constants.js'
+import { STARS_MD_FOLDER_PATH } from '../_constants.js'
 
-async function getSelfStaredRepos() {
+async function getSelfStaredRepos(delayPerPage) {
   const perPage = 100
   const repos = []
   let page = 1
   let loop = 0
   while (true) {
     console.log(`Getting page ${page}. Loop ${loop}`)
-    if (INITIAL_SEED === 'true' && loop > 1) {
-      await delay(DELAY_PER_PAGE)
+    if (loop > 1 && delayPerPage) {
+      await delay(delayPerPage)
       loop++
     }
     const pageRepos = await $fetch(`https://api.github.com/user/starred`, {
@@ -42,7 +42,7 @@ async function getSelfStaredRepos() {
 async function getReadMe(repo = {}) {
   const repoDetails = repo.repo || repo
   const repoPath = repoDetails.full_name
-  const filePath = `${STARS_MD_FOLDER}/${repoPath}.md`
+  const filePath = `${STARS_MD_FOLDER_PATH}/${repoPath}.md`
   
   // Check if file already exists
   try {
@@ -56,7 +56,7 @@ async function getReadMe(repo = {}) {
   }
 
   console.log(`Getting readme for ${repoPath}`)
-  return $fetch(`https://api.github.com/repos/${repoPath}/readme`, {
+  const [err, data] = await safe($fetch(`https://api.github.com/repos/${repoPath}/readme`, {
     headers: {
       authorization: 'Bearer ' + process.env.GITHUB_TOKEN,
       accept: 'application/vnd.github.raw+json',
@@ -64,7 +64,14 @@ async function getReadMe(repo = {}) {
     },
     retry: 3,
     retryDelay: 100,
-  })
+  }))
+
+  if (err) {
+    console.error(`Error getting readme from github: ${err}`)
+    return
+  }
+  
+  return data
 }
 
 async function getRepoHash(repo, mainBranch = 'main') {

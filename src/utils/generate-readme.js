@@ -1,7 +1,7 @@
 import { markdownMagic } from 'markdown-magic'
 import { markdownTable } from 'markdown-table'
 import { getSavedJSONFileData } from './fs.js'
-import { README_FILE } from '../_constants.js'
+import { README_FILE_PATH } from '../_constants.js'
 
 async function generateMarkdownTable() {
   /* Hey now you're an all star */
@@ -39,7 +39,7 @@ async function generateMarkdownTable() {
     ]
   })
 
-  return markdownMagic(README_FILE, {
+  return markdownMagic(README_FILE_PATH, {
     transforms: {
       ALL_STARS() {
         return markdownTable([
