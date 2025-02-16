@@ -3,11 +3,21 @@ import path from 'path'
 import { 
   JSON_DATA_FOLDER_PATH, 
   STARS_MD_FOLDER_PATH, 
+  STATE_FILE_PATH,
   SLASH_REPLACEMENT 
 } from '../_constants.js'
 
 function formatRepoName(fileName) {
   return fileName.replace('.json', '').replace(SLASH_REPLACEMENT, '/')
+}
+
+async function saveState(state) {
+  await fs.writeFile(STATE_FILE_PATH, JSON.stringify(state, null, 2))
+}
+
+async function getState() {
+  const state = await fs.readFile(STATE_FILE_PATH, 'utf8')
+  return JSON.parse(state)
 }
 
 async function getCleanedRepoNames() {
@@ -54,6 +64,8 @@ async function initDirectories() {
 }
 
 export {
+  getState,
+  saveState,
   getCleanedRepoNames,
   getSavedJSONFilePaths,
   getSavedJSONFileData,

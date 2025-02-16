@@ -3,9 +3,9 @@ import safe from 'safe-await'
 import { delay } from './utils/delay.js'
 import { generateMarkdownTable } from './utils/generate-readme.js'
 import { saveReadMe } from './utils/generate-star-md.js'
-import { getStarredRepos, getReadMe, getRepoHash } from './utils/github-api.js'
+import { getStarredRepos, getReadMe, getRawReadMe, getRepoHash } from './utils/github-api.js'
 import { saveToJSONFile } from './utils/generate-json.js'
-import { getCleanedRepoNames, getSavedJSONFileData,initDirectories, resetDirectories } from './utils/fs.js'
+import { getCleanedRepoNames, getSavedJSONFileData,initDirectories, resetDirectories, saveState } from './utils/fs.js'
 import {
   GITHUB_TOKEN,
   GITHUB_USERNAME,
@@ -39,7 +39,7 @@ async function getAllStars({
 
   /* Recursively get all stars */
   while (true) {
-    console.log(`Getting page ${page}`)
+    console.log(`Getting page ${page}...`)
     if (INITIAL_SEED === 'true' && page > 2) {
       await delay(delayPerPage)
     }
@@ -56,7 +56,7 @@ async function getAllStars({
 
     /* Check if data folder exists and already has any of these repos */
     const newRepos = repos.filter(({ repo }) => {
-      console.log('repo.full_name', repo.full_name)
+      // console.log('New repo found:', repo.full_name)
       // console.log(`${repo.full_name} Already processed?`, dataFiles.includes(repo.full_name))
       return !dataFiles.includes(repo.full_name)
     })
@@ -151,9 +151,9 @@ async function setup(username) {
   const githubStarData = await getAllStars({
     username,
     pageStart: 1,
-    maxPages: 1,
+    maxPages: 2,
     dataFiles: alreadyProcessedRepoNames,
-    // refreshAll: true,
+    refreshAll: true,
   })
 
   console.log('All stars found', githubStarData.repos.length)
@@ -162,6 +162,20 @@ async function setup(username) {
   console.log('lastPage', githubStarData.lastPage)
   console.log('rateLimitState', githubStarData.rateLimitState)
   console.log('via', githubStarData.via)
+
+  // Save lastPage and initialPage to file state.json file
+  await saveState({
+    lastRun: new Date().toISOString(),
+    run: {
+      startPage: githubStarData.initialPage,
+      endPage: githubStarData.lastPage,
+      count: githubStarData.repos.length,
+      via: githubStarData.via,
+    },
+    totalRepos: githubStarData.repos.length,
+    newRepos: githubStarData.newRepos.length,
+    rateLimitState: githubStarData.rateLimitState,
+  })
 
   /* Initialize directories */
   await initDirectories()
@@ -261,12 +275,19 @@ setup(GITHUB_USERNAME).then(() => {
   console.log('script done')
 })
 
-
 // getSavedJSONFileData().then((data) => {
 //   console.log('data', data.length)
 // })
 // getRepoHash('addyosmani/firew0rks').then((hash) => {
 //   console.log('hash', hash)
+// })
+
+
+// getRawReadMe({
+//   full_name: 'addyosmani/firew0rks',
+//   default_branch: 'main',
+// }).then((data) => {
+//   console.log('data', data)
 // })
 
 // setup(GITHUB_USERNAME).then(() => {

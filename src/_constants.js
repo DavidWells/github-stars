@@ -11,6 +11,7 @@ const SLASH_REPLACEMENT = '___|___'
 const JSON_DATA_FOLDER_PATH = path.join(__dirname, '..', 'data')
 const STARS_MD_FOLDER_PATH = path.join(__dirname, '..', 'stars')
 const README_FILE_PATH = path.join(__dirname, '..', 'README.md')
+const STATE_FILE_PATH = path.join(__dirname, '..', 'state.json')
 
 const GITHUB_USERNAME = 'davidwells'
 
@@ -21,5 +22,6 @@ export {
   JSON_DATA_FOLDER_PATH,
   STARS_MD_FOLDER_PATH,
   README_FILE_PATH,
+  STATE_FILE_PATH,
   SLASH_REPLACEMENT,
 }

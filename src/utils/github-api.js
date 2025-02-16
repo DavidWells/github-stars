@@ -56,22 +56,72 @@ async function getReadMe(repo = {}) {
   }
 
   console.log(`Getting readme for ${repoPath}`)
-  const [err, data] = await safe($fetch(`https://api.github.com/repos/${repoPath}/readme`, {
+  const [apiError, mdFromApi] = await safe(
+    $fetch(`https://api.github.com/repos/${repoPath}/readme`, {
+      headers: {
+        authorization: 'Bearer ' + process.env.GITHUB_TOKEN,
+        accept: 'application/vnd.github.raw+json',
+        'user-agent': 'github-stars',
+      },
+      retry: 3,
+      retryDelay: 100,
+    })
+  )
+
+  if (mdFromApi) {
+    return mdFromApi
+  }
+
+  if (apiError) {
+    console.error(`Error getting readme from github API: ${apiError}`)
+  }
+
+  /* Try raw request if error for README.md */
+  if (apiError || !mdFromApi) {
+    console.log(`Attempting HTTP GET for ${repoPath}/README.md`)
+    // Make HTTP GET request to the raw readme file
+    const rawREADME_md = await getRawReadMe(repoDetails, 'README.md')
+    if (rawREADME_md) {
+      return rawREADME_md
+    }
+    const rawREADME = await getRawReadMe(repoDetails, 'README')
+    if (rawREADME) {
+      return rawREADME
+    }
+    const raw_readme = await getRawReadMe(repoDetails, 'readme')
+    if (raw_readme) {
+      return raw_readme
+    }
+  }
+  
+  return mdFromApi
+}
+
+async function getRawReadMe(repo, readmeFileName = 'README.md') {
+  const repoPath = repo.full_name
+  const branch = repo.default_branch || 'main'
+
+  if (!repoPath) {
+    console.error(`Repo path is not set for ${repo}`)
+    return
+  }
+
+  if(!branch) {
+    console.error(`Branch is not set for ${repo}`)
+    return
+  }
+  const [err, rawMdData] = await safe($fetch(`https://raw.githubusercontent.com/${repoPath}/${branch}/${readmeFileName}`, {
     headers: {
-      authorization: 'Bearer ' + process.env.GITHUB_TOKEN,
-      accept: 'application/vnd.github.raw+json',
       'user-agent': 'github-stars',
     },
-    retry: 3,
-    retryDelay: 100,
   }))
 
   if (err) {
-    console.error(`Error getting readme from github: ${err}`)
+    console.error(`Error getting raw readme from github: ${err}`)
     return
   }
-  
-  return data
+
+  return rawMdData
 }
 
 async function getRepoHash(repo, mainBranch = 'main') {
@@ -149,5 +199,6 @@ export {
   getStarredRepos,
   getSelfStaredRepos,
   getReadMe,
+  getRawReadMe,
   getRepoHash,
 }
