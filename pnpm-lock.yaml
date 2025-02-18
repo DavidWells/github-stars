@@ -9,11 +9,8 @@ dependencies:
     specifier: ^11.2.0
     version: 11.3.0
   markdown-magic:
-    specifier: ^3.3.2
-    version: 3.3.2
-  markdown-table:
-    specifier: ^3.0.4
-    version: 3.0.4
+    specifier: ^3.3.3
+    version: 3.3.3
   ofetch:
     specifier: ^1.4.1
     version: 1.4.1
@@ -71,13 +68,13 @@ packages:
   /@types/concat-stream@1.6.1:
     resolution: {integrity: sha512-eHE4cQPoj6ngxBZMvVf6Hw7Mh4jMW4U9lpGmS5GBPB9RYxlFg+CHaVN7ErNY4W9XfLIEn20b4VDYaIrbq0q4uA==}
     dependencies:
-      '@types/node': 8.10.66
+      '@types/node': 10.17.60
     dev: false
 
   /@types/form-data@0.0.33:
     resolution: {integrity: sha512-8BSvG1kGm83cyJITQMZSulnl6QV8jqAGreJsc5tPu1Jq0vTSOiY/k24Wx82JRpWwZSqrala6sd5rWi6aNXvqcw==}
     dependencies:
-      '@types/node': 8.10.66
+      '@types/node': 10.17.60
     dev: false
 
   /@types/mdast@3.0.15:
@@ -1052,8 +1049,8 @@ packages:
       es5-ext: 0.10.64
     dev: false
 
-  /markdown-magic@3.3.2:
-    resolution: {integrity: sha512-DbaybaVp9eqJrH0WcnImbq4m0llaHOFIgNzzq0Fh0Onag04ve+MJgwbzimH3MB+ZQhnF7CqAX8Ai0m4hbbiE6Q==}
+  /markdown-magic@3.3.3:
+    resolution: {integrity: sha512-lDUTcZ4hQeFqLNkCxcXuV9PxXMLc4x02Tab1NcOijTOQtBYRzIfj71DUuD3osC96ilpbR3DVYdog/rHUNlMvYA==}
     hasBin: true
     dependencies:
       '@davidwells/md-utils': 0.0.40
@@ -1068,6 +1065,7 @@ packages:
       node-fetch: 2.7.0
       oparser: 3.0.22
       smart-glob: 1.0.2
+      string-width: 4.2.3
       sync-request: 6.1.0
     transitivePeerDependencies:
       - encoding
@@ -1078,10 +1076,6 @@ packages:
     resolution: {integrity: sha512-Ezda85ToJUBhM6WGaG6veasyym+Tbs3cMAw/ZhOPqXiYsr0jgocBV3j3nx+4lk47plLlIqjwuTm/ywVI+zjJ/A==}
     dependencies:
       repeat-string: 1.6.1
-    dev: false
-
-  /markdown-table@3.0.4:
-    resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
     dev: false
 
   /math-intrinsics@1.1.0:
