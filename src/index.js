@@ -145,6 +145,9 @@ async function getAllStars({
 }
 
 async function setup(username) {
+  /* Initialize directories, if they don't exist */
+  await initDirectories()
+
   const alreadyProcessedRepoNames = await getCleanedRepoNames()
 
   const githubStarData = await getAllStars({
@@ -162,8 +165,7 @@ async function setup(username) {
   console.log('rateLimitState', githubStarData.rateLimitState)
   console.log('via', githubStarData.via)
 
-  // Save lastPage and initialPage to file state.json file
-  await saveState({
+  const state = {
     lastRun: new Date().toISOString(),
     run: {
       startPage: githubStarData.initialPage,
@@ -174,10 +176,10 @@ async function setup(username) {
     totalRepos: githubStarData.repos.length,
     newRepos: githubStarData.newRepos.length,
     rateLimitState: githubStarData.rateLimitState,
-  })
+  }
 
-  /* Initialize directories */
-  await initDirectories()
+  // Save lastPage and initialPage to file state.json file
+  await saveState(state)
 
   /* Process all repos found and save to JSON */
   const processFilesPromise = githubStarData.newRepos.map(async (repo) => {
