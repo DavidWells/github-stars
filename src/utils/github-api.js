@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import safe from 'safe-await'
 import { $fetch } from 'ofetch'
 import { delay } from './delay.js'
-import { STARS_MD_FOLDER_PATH } from '../_constants.js'
+import { STARS_DIRECTORY } from '../_constants.js'
 
 async function getSelfStaredRepos(delayPerPage) {
   const perPage = 100
@@ -42,7 +42,7 @@ async function getSelfStaredRepos(delayPerPage) {
 async function getReadMe(repo = {}) {
   const repoDetails = repo.repo || repo
   const repoPath = repoDetails.full_name
-  const filePath = `${STARS_MD_FOLDER_PATH}/${repoPath}.md`
+  const filePath = `${STARS_DIRECTORY}/${repoPath}.md`
   
   // Check if file already exists
   try {
@@ -54,6 +54,8 @@ async function getReadMe(repo = {}) {
   } catch (err) {
     console.error(`Error checking file existence: ${err}`)
   }
+
+  // From a commit https://raw.githubusercontent.com/org/name/dc3e42769b08fb091b3258c0e7c0dfbe19b11782/README.md
 
   console.log(`Getting readme for ${repoPath}`)
   const [apiError, mdFromApi] = await safe(
@@ -80,10 +82,10 @@ async function getReadMe(repo = {}) {
   if (apiError || !mdFromApi) {
     console.log(`Attempting HTTP GET for ${repoPath}/README.md`)
     // Make HTTP GET request to the raw readme file
-    const rawREADME_md = await getRawReadMe(repoDetails, 'README.md')
-    if (rawREADME_md) {
-      return rawREADME_md
-    }
+    // const rawREADME_md = await getRawReadMe(repoDetails, 'README.md')
+    // if (rawREADME_md) {
+    //   return rawREADME_md
+    // }
     const rawREADME = await getRawReadMe(repoDetails, 'README')
     if (rawREADME) {
       return rawREADME
@@ -140,6 +142,33 @@ async function getRepoHash(repo, mainBranch = 'main') {
   }
 
   return data.sha
+}
+
+async function getGitHashFromDate(repo, date) {
+  try {
+    const commits = await $fetch(`https://api.github.com/repos/${repo}/commits`, {
+      query: {
+        until: date,
+        per_page: 1
+      },
+      headers: {
+        'authorization': 'Bearer ' + process.env.GITHUB_TOKEN,
+        'user-agent': 'github-stars',
+      },
+      retry: 3,
+      retryDelay: 100,
+    })
+
+    if (!commits || !commits[0] || !commits[0].sha) {
+      console.log(`No commits found for ${repo} before ${date}`)
+      return null
+    }
+
+    return commits[0].sha
+  } catch (error) {
+    console.error(`Error fetching git hash for ${repo}: ${error.message}`)
+    return null
+  }
 }
 
 async function getStarredRepos(username, page = 1) {
@@ -201,4 +230,5 @@ export {
   getReadMe,
   getRawReadMe,
   getRepoHash,
+  getGitHashFromDate,
 }

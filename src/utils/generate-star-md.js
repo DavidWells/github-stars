@@ -1,5 +1,5 @@
 import fs from 'fs-extra'
-import { STARS_MD_FOLDER_PATH } from '../_constants.js'
+import { STARS_DIRECTORY } from '../_constants.js'
 
 async function saveReadMe(repo, readme) {
   const repoDetails = repo.repo || repo
@@ -19,9 +19,9 @@ description: |-
 ${readme}
 ` 
 
-  await fs.ensureDir(`${STARS_MD_FOLDER_PATH}/${repoDetails.owner.login}`)
+  await fs.ensureDir(`${STARS_DIRECTORY}/${repoDetails.owner.login}`)
 
-  const readMePath = `${STARS_MD_FOLDER_PATH}/${repoPath}.md`
+  const readMePath = `${STARS_DIRECTORY}/${repoPath}.md`
   return fs.writeFile(readMePath, fileContent).then(() => {
     return readMePath
   })

@@ -6,22 +6,24 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const { GITHUB_TOKEN } = process.env
+const GITHUB_USERNAME = 'davidwells'
 const SLASH_REPLACEMENT = '___|___'
 
-const JSON_DATA_FOLDER_PATH = path.join(__dirname, '..', 'data')
-const STARS_MD_FOLDER_PATH = path.join(__dirname, '..', 'stars')
-const README_FILE_PATH = path.join(__dirname, '..', 'README.md')
-const STATE_FILE_PATH = path.join(__dirname, '..', 'state.json')
-
-const GITHUB_USERNAME = 'davidwells'
+const ROOT_DIRECTORY = path.join(__dirname, '..')
+const README_FILEPATH = path.join(ROOT_DIRECTORY, 'README.md')
+const STARS_DIRECTORY = path.join(ROOT_DIRECTORY, 'stars')
+const CACHE_DIRECTORY = path.join(ROOT_DIRECTORY, 'cache')
+const JSON_CACHE_DIRECTORY = path.join(CACHE_DIRECTORY, 'data')
+const STATE_CACHE_FILEPATH = path.join(CACHE_DIRECTORY, 'state.json')
 
 export {
   fileURLToPath,
   GITHUB_TOKEN,
   GITHUB_USERNAME,
-  JSON_DATA_FOLDER_PATH,
-  STARS_MD_FOLDER_PATH,
-  README_FILE_PATH,
-  STATE_FILE_PATH,
+  CACHE_DIRECTORY,
+  JSON_CACHE_DIRECTORY,
+  STARS_DIRECTORY,
+  README_FILEPATH,
+  STATE_CACHE_FILEPATH,
   SLASH_REPLACEMENT,
 }

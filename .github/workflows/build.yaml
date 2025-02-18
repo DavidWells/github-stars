@@ -19,19 +19,38 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      # - uses: pnpm/action-setup@v4
-      #   with:
-      #     run_install: |
-      #       - recursive: true
-      #         args: [--frozen-lockfile, --strict-peer-dependencies]
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: |
+            - recursive: true
+              args: [--frozen-lockfile, --strict-peer-dependencies]
 
-      # - run: pnpm build
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Restore cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            stars
+            data
+          key: ${{ runner.os }}-stars-${{ github.run_number }}
+          restore-keys: |
+            ${{ runner.os }}-stars-
 
-      # - name: Commit & Push changes
-      #   uses: actions-js/push@master
-      #   with:
-      #     github_token: ${{ secrets.GH_TOKEN }}
-      #     branch: master
-      #     message: 'chore: autopublish [skip ci]'
+      - run: pnpm build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Save cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            stars
+            data
+          key: ${{ runner.os }}-stars-${{ github.run_number }}
+
+      - name: Commit & Push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          branch: master
+          message: 'chore: autopublish [skip ci]'

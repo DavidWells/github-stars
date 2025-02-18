@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node --env-file .env src/index.js",
     "build": "node src/index.js",
-    "generate-readme": "node src/readme.js"
+    "gen": "node src/readme.js"
   },
   "keywords": [],
   "author": "",

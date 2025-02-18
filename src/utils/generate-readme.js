@@ -1,6 +1,6 @@
 import { markdownMagic, stringUtils } from 'markdown-magic'
 import { getSavedJSONFileData } from './fs.js'
-import { README_FILE_PATH } from '../_constants.js'
+import { README_FILEPATH } from '../_constants.js'
 
 const EMPTY_WHITE_SPACE_CHAR = '‎'
 
@@ -33,7 +33,7 @@ async function generateMarkdownTable(opts) {
         isDisabled: repo.disabled,
         topics: repo.topics,
       }
-    }) //.slice(0, 100)
+    })//.slice(0, 100)
 
   
   console.log('Stars to process', sortedByStarredDate.length)
@@ -51,7 +51,7 @@ async function generateMarkdownTable(opts) {
   }
 
 
-  return markdownMagic(README_FILE_PATH, {
+  return markdownMagic(README_FILEPATH, {
     transforms: {
       ALL_STARS() {
         const MAX_WIDTH = 90
@@ -60,19 +60,18 @@ async function generateMarkdownTable(opts) {
         md +=    '|:-------------|:--------------:|\n';
         sortedByStarredDate.forEach((data) => {
           // console.log('item', item)
-          const { repo, description, starredAt, createdAt } = data
+          const { repo, description, starredAt, createdAt, topics } = data
           const url = `https://github.com/${repo}`
           const desc = (data.description || '').trim().replace(/\.$/, '')
-          const formattedDescription = stringUtils.stringBreak(desc, MAX_WIDTH).join('<br/>')
-          const _description = (data.description) ? `<br/>${formattedDescription}.` : ''
-          const lang = tinyText(`- ${data.language}`)
-          const langRender = (lang) ? ` ${lang}` : ''
+          const formattedDescription = stringUtils.stringBreak(desc, MAX_WIDTH).join('<br/>') 
+          const _description = (data.description) ? `<br/>${formattedDescription}. ` : ''
+          const topicsRender = (topics && topics.length > 0) ? `<br/>${stringUtils.stringBreak(tinyText(`Tags: ${topics.map((topic) => `#${topic}`).join(' ')}`), MAX_WIDTH + 60).join('<br/>')}` : ''
+          const langText = (data.language) ? ` - ${data.language}` : ''
+          const createdText = (createdAt) ? ` - ${formatDate(createdAt)}` : ''
+          const inlineMeta = tinyText(`${langText}${createdText}`)
           const starredText = formatDate(starredAt)
-          const starredDate = tinyText(`⭐️ ${starredText}`)
-          const createdText = (createdAt) ? formatDate(createdAt) : ''
-          const createdRender = (createdText) ? ` ${tinyText(`- 🗓️ ${createdText}`)}` : ''
           // add table rows
-          md += `| [${stringUtils.stringBreak(data.repo, MAX_WIDTH).join('<br/>')}](${url})${createdRender}${langRender}${_description} | ${starredText} | \n`;
+          md += `| [${stringUtils.stringBreak(data.repo, MAX_WIDTH).join('<br/>')}](${url})${inlineMeta}${topicsRender}${_description} | ${starredText} | \n`;
         })
 
         return md;

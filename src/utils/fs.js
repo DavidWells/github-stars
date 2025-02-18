@@ -1,9 +1,9 @@
 import fs from 'fs-extra'
 import path from 'path'
 import { 
-  JSON_DATA_FOLDER_PATH, 
-  STARS_MD_FOLDER_PATH, 
-  STATE_FILE_PATH,
+  JSON_CACHE_DIRECTORY, 
+  STARS_DIRECTORY, 
+  STATE_CACHE_FILEPATH,
   SLASH_REPLACEMENT 
 } from '../_constants.js'
 
@@ -12,11 +12,11 @@ function formatRepoName(fileName) {
 }
 
 async function saveState(state) {
-  await fs.writeFile(STATE_FILE_PATH, JSON.stringify(state, null, 2))
+  await fs.writeFile(STATE_CACHE_FILEPATH, JSON.stringify(state, null, 2))
 }
 
 async function getState() {
-  const state = await fs.readFile(STATE_FILE_PATH, 'utf8')
+  const state = await fs.readFile(STATE_CACHE_FILEPATH, 'utf8')
   return JSON.parse(state)
 }
 
@@ -30,7 +30,7 @@ async function getSavedJSONFilePaths() {
   let dataFiles = []
   try {
     // filter out any non .json files
-    dataFiles = await fs.readdir(JSON_DATA_FOLDER_PATH)
+    dataFiles = await fs.readdir(JSON_CACHE_DIRECTORY)
     dataFiles = dataFiles.filter((file) => file.endsWith('.json'))
   } catch (e) {
     console.error(`Error reading data folder: ${e}`)
@@ -41,7 +41,7 @@ async function getSavedJSONFilePaths() {
 async function getSavedJSONFileData() {
   const repoFilePaths = await getSavedJSONFilePaths()
   const repoFileData = await Promise.all(repoFilePaths.map(async (filePath) => {
-    const data = await fs.readFile(path.join(JSON_DATA_FOLDER_PATH, filePath), 'utf8')
+    const data = await fs.readFile(path.join(JSON_CACHE_DIRECTORY, filePath), 'utf8')
     try {
       const json = JSON.parse(data)
       return json
@@ -54,13 +54,13 @@ async function getSavedJSONFileData() {
 }
 
 async function resetDirectories() {
-  await fs.remove(JSON_DATA_FOLDER_PATH)
-  await fs.remove(STARS_MD_FOLDER_PATH)
+  await fs.remove(JSON_CACHE_DIRECTORY)
+  await fs.remove(STARS_DIRECTORY)
 }
 
 async function initDirectories() {
-  await fs.ensureDir(JSON_DATA_FOLDER_PATH)
-  await fs.ensureDir(STARS_MD_FOLDER_PATH)
+  await fs.ensureDir(JSON_CACHE_DIRECTORY)
+  await fs.ensureDir(STARS_DIRECTORY)
 }
 
 export {

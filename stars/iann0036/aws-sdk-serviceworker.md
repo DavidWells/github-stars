@@ -1,0 +1,27 @@
+---
+repo: iann0036/aws-sdk-serviceworker
+name: aws-sdk-serviceworker
+homepage: https://aws.amazon.com/developer/language/javascript/
+url: https://github.com/iann0036/aws-sdk-serviceworker
+stars: 3
+starredAt: 2023-01-02T20:03:42Z
+description: |-
+    AWS SDK for JavaScript Service Workers
+---
+
+# AWS SDK for JavaScript Service Workers
+
+This is a fork of the [AWS JS SDK v2](https://github.com/aws/aws-sdk-js) with modifications to make it compatible with [Service Workers](https://developers.google.com/web/fundamentals/primers/service-workers).
+
+## Build
+
+To generate the full unminified SDK, run the following:
+
+```
+npm update
+npm run-script build
+```
+
+The `aws-sdk-2.xxxx.x-sw.js` file will be generated for you in the project root.
+
+

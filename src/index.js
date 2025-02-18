@@ -146,8 +146,7 @@ async function getAllStars({
 
 async function setup(username) {
   const alreadyProcessedRepoNames = await getCleanedRepoNames()
-  // console.log(alreadyProcessedRepoNames)
-  // process.exit(1)
+
   const githubStarData = await getAllStars({
     username,
     pageStart: 1,
@@ -189,7 +188,9 @@ async function setup(username) {
   console.log('finished saving', filePaths.length)
   console.log('filePaths', filePaths)
 
-  await generateMarkdownTable()
+  await generateMarkdownTable({
+    excludePrivateRepos: true
+  })
 
   /* Collect all readmes to write */
   const readMePaths = await Promise.all(githubStarData.newRepos.map(async (repo) => {
@@ -282,6 +283,9 @@ setup(GITHUB_USERNAME).then(() => {
 //   console.log('hash', hash)
 // })
 
+// getGitHashFromDate('jason-m-hicks/github-stars', '2024-01-01').then((hash) => {
+//   console.log('hash', hash)
+// })
 
 // getRawReadMe({
 //   full_name: 'addyosmani/firew0rks',
