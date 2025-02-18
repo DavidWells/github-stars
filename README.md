@@ -1,6 +1,6 @@
 # GitHub Stars
 
-Get all your starred repositories, save their README files in Markdown and generate an index.
+Get all your starred repositories, save their README files in Markdown and generate an index. 
 
 <!-- doc-gen TOC collapse=true -->
 <details>
