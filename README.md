@@ -857,10 +857,37 @@ Total Stars: <!-- doc-gen STAR_COUNT -->200<!-- end-doc-gen -->
 
 Initial seed is delayed for 30 seconds to avoid rate limiting.
 
-```
+```bash
 export GH_TOKEN=your_token
 export INITIAL_SEED=TRUE
 node index.js
+```
+
+Some readmes have "secrets" in them and you might see this error. You need to use the link to whitelist the false positives. I don't make the rules.
+
+```bash
+remote: error: GH013: Repository rule violations found for refs/heads/master.        
+remote: 
+remote: - GITHUB PUSH PROTECTION        
+remote:   —————————————————————————————————————————        
+remote:     Resolve the following violations before pushing again        
+remote: 
+remote:     - Push cannot contain secrets        
+remote: 
+remote:             
+remote:      (?) Learn how to resolve a blocked push        
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push        
+remote:             
+remote:             
+remote:       —— Amazon AWS Access Key ID ——————————————————————————        
+remote:        locations:        
+remote:          - commit: ab84a97196687a7dfa9d6b58dfe6902fc02327be        
+remote:            path: stars/PrecursorApp/precursor.md:39        
+remote:             
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.        
+remote:        https://github.com/DavidWells/github-stars/security/secret-scanning/unblock-secret/2tJrr7ebPsFeLOVRA8ZN5oXfwXx        
+remote:             
+remote:             
 ```
 
 ### Props
