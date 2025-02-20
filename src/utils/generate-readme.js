@@ -3,6 +3,7 @@ import { getSavedJSONFileData } from './fs.js'
 import { README_FILEPATH } from '../_constants.js'
 
 const EMPTY_WHITE_SPACE_CHAR = '‎'
+const BRAILE_SPACE = '⠀'
 
 async function generateMarkdownTable(opts) {
   const options = opts || {}
@@ -54,7 +55,7 @@ async function generateMarkdownTable(opts) {
     // debug: true,
     transforms: {
       STAR_COUNT: async function () {
-        return allStars.length
+        return numberWithCommas(allStars.length)
       },
       ALL_STARS_TABLE() {
         const MAX_WIDTH = 80
@@ -75,13 +76,13 @@ async function generateMarkdownTable(opts) {
           const langText = (data.language) ? ` - ${data.language}` : ''
           const createdText = (createdAt) ? ` - ${formatDate(createdAt)}` : ''
           const inlineMeta = tinyText(`${langText}${createdText}`)
-          const starredText = formatDate(starredAt)
+          const starredText = BRAILE_SPACE.repeat(3) + formatDate(starredAt) + BRAILE_SPACE.repeat(3)
           const localReadMe = localReadMePath(repo)
           
           html += `
   <tr>
     <td><a href="${url}">${stringUtils.stringBreak(repo, MAX_WIDTH).join('<br/>')}</a>${inlineMeta}${topicsRender}${_description}</td>
-    <td>[${starredText}](${localReadMe})</td>
+    <td><a href="${localReadMe}">${starredText}</a></td>
   </tr>`
         })
         
