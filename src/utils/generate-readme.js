@@ -35,7 +35,6 @@ async function generateMarkdownTable(opts) {
       }
     }) //.slice(0, 100)
 
-  
   console.log('Stars to process', sortedByStarredDate.length)
 
   if (options.excludePrivateRepos) {
@@ -46,14 +45,17 @@ async function generateMarkdownTable(opts) {
       }
       return !repo.private
     })
-    console.log('Stars to filtered', sortedByStarredDate.length)
-    console.log('Stars to process', privateRepos)
+    console.log('Filtered out private repos', sortedByStarredDate.length)
+    // console.log('privateRepos', privateRepos)
   }
 
 
   return markdownMagic(README_FILEPATH, {
-    debug: true,
+    // debug: true,
     transforms: {
+      STAR_COUNT: async function () {
+        return allStars.length
+      },
       ALL_STARS_TABLE() {
         const MAX_WIDTH = 80
         /* Make HTML Table */

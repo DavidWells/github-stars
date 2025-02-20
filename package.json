@@ -14,7 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "fs-extra": "^11.2.0",
-    "markdown-magic": "^3.3.3",
+    "markdown-magic": "^3.4.0",
     "ofetch": "^1.4.1",
     "safe-await": "^2.0.0"
   },
