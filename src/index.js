@@ -6,7 +6,14 @@ import { generateMarkdownTable } from './utils/generate-readme.js'
 import { saveReadMe } from './utils/generate-star-md.js'
 import { getStarredRepos, getReadMe, getRawReadMe, getRepoHash } from './utils/github-api.js'
 import { saveToJSONFile } from './utils/generate-json.js'
-import { getCleanedRepoNames, getSavedJSONFileData,initDirectories, resetDirectories, saveState } from './utils/fs.js'
+import { 
+  getCleanedRepoNames, 
+  getSavedJSONFileData,
+  initDirectories, 
+  resetDirectories,
+  readMesToFetch, 
+  saveState 
+} from './utils/fs.js'
 import {
   GITHUB_TOKEN,
   GITHUB_USERNAME,
@@ -217,7 +224,7 @@ async function setup(username) {
 
   if (githubStarData.rateLimitState.remaining <= 0) {
     console.log('Rate limit reached, stopping here')
-    process.exit(1)
+    // process.exit(1)
   }
 }
 
