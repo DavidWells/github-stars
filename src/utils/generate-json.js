@@ -1,11 +1,11 @@
 import fs from 'fs-extra'
-import { SLASH_REPLACEMENT } from '../_constants.js'
+import { SLASH_REPLACEMENT, JSON_CACHE_DIRECTORY } from '../_constants.js'
 
 async function saveToJSONFile(apiResponse = {}) {
   const cleanedRepo = cleanGithubRepo(apiResponse)
   const repoDetails = cleanedRepo.repo
   const data = JSON.stringify(cleanedRepo, null, 2)
-  const filePath = `data/${repoDetails.full_name.replace('/', SLASH_REPLACEMENT)}.json`
+  const filePath = `${JSON_CACHE_DIRECTORY}/${repoDetails.full_name.replace('/', SLASH_REPLACEMENT)}.json`
   return fs.writeFile(filePath, data).then(() => filePath)
 }
 

@@ -33,7 +33,7 @@ async function generateMarkdownTable(opts) {
         isDisabled: repo.disabled,
         topics: repo.topics,
       }
-    })//.slice(0, 100)
+    }) //.slice(0, 100)
 
   
   console.log('Stars to process', sortedByStarredDate.length)
@@ -52,8 +52,42 @@ async function generateMarkdownTable(opts) {
 
 
   return markdownMagic(README_FILEPATH, {
+    debug: true,
     transforms: {
-      ALL_STARS() {
+      ALL_STARS_TABLE() {
+        const MAX_WIDTH = 80
+        /* Make HTML Table */
+        let html = `<table>
+  <tr>
+    <th align="left">Repo</th>
+    <th align="center">Starred On</th>
+  </tr>`
+        
+        sortedByStarredDate.forEach((data) => {
+          const { repo, description, starredAt, createdAt, topics } = data
+          const url = `https://github.com/${repo}`
+          const desc = (data.description || '').trim().replace(/\.$/, '')
+          const formattedDescription = stringUtils.stringBreak(desc, MAX_WIDTH).join('<br/>') 
+          const _description = (data.description) ? `<br/>${formattedDescription}. ` : ''
+          const topicsRender = (topics && topics.length > 0) ? `<br/>${stringUtils.stringBreak(tinyText(`Tags: ${topics.map((topic) => `#${topic}`).join(' ')}`), MAX_WIDTH + 60).join('<br/>')}` : ''
+          const langText = (data.language) ? ` - ${data.language}` : ''
+          const createdText = (createdAt) ? ` - ${formatDate(createdAt)}` : ''
+          const inlineMeta = tinyText(`${langText}${createdText}`)
+          const starredText = formatDate(starredAt)
+          
+          html += `
+  <tr>
+    <td><a href="${url}">${stringUtils.stringBreak(repo, MAX_WIDTH).join('<br/>')}</a>${inlineMeta}${topicsRender}${_description}</td>
+    <td>${starredText}</td>
+  </tr>`
+        })
+        
+        html += `
+</table>`
+
+        return html
+      },
+      ALL_STARS_MD() {
         const MAX_WIDTH = 90
         /* Make Markdown Table */
         let md = `| Repo | Starred On |\n`;
@@ -81,6 +115,7 @@ async function generateMarkdownTable(opts) {
 }
 
 function tinyText(text, newLine = false) {
+  // return text
   if (!text) return ''
   const brTag = newLine ? '<br/>' : ''
   return `${brTag}<sup><sub>${text}</sub></sup>`
@@ -88,6 +123,11 @@ function tinyText(text, newLine = false) {
 
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function trimIsoDate(isoDateString) {
+  return tinyText(isoDateString.split('T')[0])
+  return EMPTY_WHITE_SPACE_CHAR.repeat(3) + isoDateString.split('T')[0] + EMPTY_WHITE_SPACE_CHAR.repeat(3) 
 }
 
 // Add this helper function for date formatting

@@ -178,6 +178,8 @@ async function setup(username) {
     rateLimitState: githubStarData.rateLimitState,
   }
 
+  console.log('state', state)
+
   // Save lastPage and initialPage to file state.json file
   await saveState(state)
 
