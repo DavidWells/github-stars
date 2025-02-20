@@ -52,4 +52,6 @@ async function generateStaticSite() {
   }
 }
 
-generateStaticSite()
+export { 
+  generateStaticSite
+}

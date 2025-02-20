@@ -1,7 +1,12 @@
 import ghpages from 'gh-pages'
+import { generateStaticSite } from '../utils/generate-site.js'
 import { SITE_DIRECTORY } from '../_constants.js'
 
-async function setupGhPages() {
+async function buildAndDeploy() {
+  /* Generate the static site */
+  await generateStaticSite()
+
+  /* Deploy the static site */
   try {
     await ghpages.publish(SITE_DIRECTORY)
     console.log('Successfully deployed to gh-pages')
@@ -10,4 +15,4 @@ async function setupGhPages() {
   }
 }
 
-setupGhPages()
+buildAndDeploy()
