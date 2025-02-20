@@ -58,7 +58,7 @@ async function generateMarkdownTable(opts) {
         return numberWithCommas(allStars.length)
       },
       ALL_STARS_TABLE() {
-        const MAX_WIDTH = 80
+        const MAX_WIDTH = 75
         /* Make HTML Table */
         let html = `<table>
   <tr>
@@ -66,7 +66,7 @@ async function generateMarkdownTable(opts) {
     <th align="center">Starred On</th>
   </tr>`
         
-        sortedByStarredDate.forEach((data) => {
+        sortedByStarredDate.forEach((data, i) => {
           const { repo, description, starredAt, createdAt, topics } = data
           const url = `https://github.com/${repo}`
           const desc = (data.description || '').trim().replace(/\.$/, '')
@@ -76,13 +76,14 @@ async function generateMarkdownTable(opts) {
           const langText = (data.language) ? ` - ${data.language}` : ''
           const createdText = (createdAt) ? ` - ${formatDate(createdAt)}` : ''
           const inlineMeta = tinyText(`${langText}${createdText}`)
-          const starredText = BRAILE_SPACE.repeat(3) + formatDate(starredAt) + BRAILE_SPACE.repeat(3)
+          const starredText = BRAILE_SPACE.repeat(0) + formatDate(starredAt) + BRAILE_SPACE.repeat(0)
+          const BlankLine = BRAILE_SPACE.repeat(10) + '<br/>'
           const localReadMe = localReadMePath(repo)
           
           html += `
   <tr>
-    <td><a href="${url}">${stringUtils.stringBreak(repo, MAX_WIDTH).join('<br/>')}</a>${inlineMeta}${topicsRender}${_description}</td>
-    <td><a href="${localReadMe}">${starredText}</a></td>
+    <td>${i}<a href="${url}">${stringUtils.stringBreak(repo, MAX_WIDTH).join('<br/>')}</a>${inlineMeta}${topicsRender}${_description}</td>
+    <td><a href="${localReadMe}">${starredText}</a><br/>${BlankLine}</td>
   </tr>`
         })
         
