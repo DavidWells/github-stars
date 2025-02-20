@@ -25,28 +25,16 @@ jobs:
             - recursive: true
               args: [--frozen-lockfile, --strict-peer-dependencies]
 
-      - name: Restore cache
-        uses: actions/cache/restore@v4
+      - uses: actions/cache@v4
         with:
           path: |
             stars
             data
-          key: ${{ runner.os }}-stars-${{ github.run_number }}
-          restore-keys: |
-            ${{ runner.os }}-stars-
+          key: ${{ runner.os }}-stars-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm build
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-      - name: Save cache
-        uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: |
-            stars
-            data
-          key: ${{ runner.os }}-stars-${{ github.run_number }}
 
       - name: Commit & Push changes
         uses: actions-js/push@master

@@ -153,7 +153,7 @@ async function setup(username) {
   const githubStarData = await getAllStars({
     username,
     pageStart: 1,
-    maxPages: 2,
+    // maxPages: 2,
     dataFiles: alreadyProcessedRepoNames,
     refreshAll: true,
   })
