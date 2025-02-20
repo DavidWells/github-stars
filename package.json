@@ -16,6 +16,7 @@
     "fs-extra": "^11.2.0",
     "markdown-magic": "^3.4.0",
     "ofetch": "^1.4.1",
+    "p-limit": "^6.2.0",
     "safe-await": "^2.0.0"
   },
   "packageManager": "pnpm@9.15.3"

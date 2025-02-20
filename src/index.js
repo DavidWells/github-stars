@@ -196,12 +196,21 @@ async function setup(username) {
     excludePrivateRepos: true
   })
 
-  /* Collect all readmes to write */
-  const readMePaths = await Promise.all(githubStarData.newRepos.map(async (repo) => {
-    const [readmeError, readme] = await safe(getReadMe(repo))
-    const saveReadMePromise = readme ? saveReadMe(repo, readme) : Promise.resolve()
-    return saveReadMePromise
-  }))
+  /* Half the rate limit per hour. to avoid rate limit */
+  const GITHUB_API_LIMIT = 2500
+  const limit = pLimit(3)
+  /* Resolve unfetched readmes */
+  const readMesToFetch = (await readMesToFetch(githubStarData.newRepos)).slice(0, GITHUB_API_LIMIT)
+  console.log('Repos that need a README saved', readMesToFetch.length)
+
+  const readMePaths = await Promise.all(
+    readMesToFetch.map(repo => {
+      limit(async () => {
+        const [readmeError, readme] = await safe(getReadMe(repo))
+        return readme ? saveReadMe(repo, readme) : Promise.resolve()
+      })
+    })
+  )
 
   console.log(`Wrote ${readMePaths.length} README files`)
 

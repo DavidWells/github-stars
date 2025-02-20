@@ -53,6 +53,43 @@ async function getSavedJSONFileData() {
   return repoFileData
 }
 
+async function readMesToFetch(githubStarData) {
+  const results = await Promise.all(
+    githubStarData.map(async (item) => {
+      const repo = item.repo
+      const readmePath = `${STARS_DIRECTORY}/${repo.full_name}.md`
+      try {
+        const itExists = await fs.pathExists(readmePath)
+        if (itExists) {
+          return null
+        }
+      } catch(e) {
+        return item // README doesn't exist
+      }
+      return item
+    })
+  )
+
+  const reposNeedingReadme = results.filter((item) => item !== null)
+  return reposNeedingReadme
+}
+
+/*  
+const githubStarData = await getSavedJSONFileData()
+readMesToFetch(githubStarData).then((repos) => {
+  console.log('repos', repos)
+})
+/** */
+
+async function fileDoesNotExist(filePath) {
+  try {
+    const exists = await fs.pathExists(filePath)
+    return !exists
+  } catch (e) {
+    // console.error(`Error checking file existence: ${e}`)
+  }
+  return false
+}
 async function resetDirectories() {
   await fs.remove(JSON_CACHE_DIRECTORY)
   await fs.remove(STARS_DIRECTORY)
@@ -64,6 +101,8 @@ async function initDirectories() {
 }
 
 export {
+  fileDoesNotExist,
+  readMesToFetch,
   getState,
   saveState,
   getCleanedRepoNames,

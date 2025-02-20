@@ -76,11 +76,12 @@ async function generateMarkdownTable(opts) {
           const createdText = (createdAt) ? ` - ${formatDate(createdAt)}` : ''
           const inlineMeta = tinyText(`${langText}${createdText}`)
           const starredText = formatDate(starredAt)
+          const localReadMe = localReadMePath(repo)
           
           html += `
   <tr>
     <td><a href="${url}">${stringUtils.stringBreak(repo, MAX_WIDTH).join('<br/>')}</a>${inlineMeta}${topicsRender}${_description}</td>
-    <td>${starredText}</td>
+    <td>[${starredText}](${localReadMe})</td>
   </tr>`
         })
         
@@ -121,6 +122,10 @@ function tinyText(text, newLine = false) {
   if (!text) return ''
   const brTag = newLine ? '<br/>' : ''
   return `${brTag}<sup><sub>${text}</sub></sup>`
+}
+
+function localReadMePath(repo) {
+  return `./stars/${repo}.md`
 }
 
 function numberWithCommas(x) {
