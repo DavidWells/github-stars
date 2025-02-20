@@ -200,12 +200,12 @@ async function setup(username) {
   /* Half the rate limit per hour. to avoid rate limit */
   const GITHUB_API_LIMIT = 2500
   const limit = pLimit(3)
-  /* Resolve unfetched readmes */
-  const readMesToFetch = (await readMesToFetch(githubStarData.newRepos)).slice(0, GITHUB_API_LIMIT)
-  console.log('Repos that need a README saved', readMesToFetch.length)
+  /* Resolve un-fetched readmes */
+  const readMes = (await readMesToFetch(githubStarData.newRepos)).slice(0, GITHUB_API_LIMIT)
+  console.log('Repos that need a README saved', readMes.length)
 
   const readMePaths = await Promise.all(
-    readMesToFetch.map(repo => {
+    readMes.map(repo => {
       limit(async () => {
         const [readmeError, readme] = await safe(getReadMe(repo))
         return readme ? saveReadMe(repo, readme) : Promise.resolve()
