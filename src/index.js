@@ -1,5 +1,6 @@
 import fs from 'fs-extra'
 import safe from 'safe-await'
+import pLimit from 'p-limit'
 import { delay } from './utils/delay.js'
 import { generateMarkdownTable } from './utils/generate-readme.js'
 import { saveReadMe } from './utils/generate-star-md.js'
@@ -153,7 +154,7 @@ async function setup(username) {
   const githubStarData = await getAllStars({
     username,
     pageStart: 1,
-    // maxPages: 2,
+    maxPages: 30,
     dataFiles: alreadyProcessedRepoNames,
     refreshAll: true,
   })
