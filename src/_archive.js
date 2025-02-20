@@ -14,9 +14,9 @@ const { INITIAL_SEED, GITHUB_TOKEN } = process.env
 const DELAY_PER_PAGE = 2000
 const SLASH_REPLACEMENT = '___|___'
 
-const RAW_DATA_FOLDER = path.join(__dirname, 'data')
-const STARS_MD_FOLDER = path.join(__dirname, 'stars')
-const README_FILE = path.join(__dirname, 'README.md')
+const JSON_CACHE_DIRECTORY = path.join(__dirname, 'data')
+const STARS_DIRECTORY = path.join(__dirname, 'stars')
+const README_FILEPATH = path.join(__dirname, 'README.md')
 
 const GITHUB_USERNAME = 'davidwells'
 
@@ -275,7 +275,7 @@ async function getAllStars({
 async function getSavedRepoFilePaths() {
   let dataFiles = []
   try {
-    dataFiles = await fs.readdir(RAW_DATA_FOLDER)
+    dataFiles = await fs.readdir(JSON_CACHE_DIRECTORY)
   } catch (e) {
     console.error(`Error reading data folder: ${e}`)
   }
@@ -285,7 +285,7 @@ async function getSavedRepoFilePaths() {
 async function getAllSavedRepoFileData() {
   const repoFilePaths = await getSavedRepoFilePaths()
   const repoFileData = await Promise.all(repoFilePaths.map(async (filePath) => {
-    const data = await fs.readFile(path.join(RAW_DATA_FOLDER, filePath), 'utf8')
+    const data = await fs.readFile(path.join(JSON_CACHE_DIRECTORY, filePath), 'utf8')
     return JSON.parse(data)
   }))
   return repoFileData
@@ -296,11 +296,11 @@ function formatRepoName(fileName) {
 }
 
 async function resetJSONData() {
-  await fs.remove(RAW_DATA_FOLDER)
+  await fs.remove(JSON_CACHE_DIRECTORY)
 }
 
 async function resetMarkdownData() {
-  await fs.remove(STARS_MD_FOLDER)
+  await fs.remove(STARS_DIRECTORY)
 }
 
 async function fetchAllStarData(username) {
@@ -329,8 +329,8 @@ async function saveStars(username) {
   process.exit(1)
   /** */
 
-  await fs.ensureDir(RAW_DATA_FOLDER)
-  await fs.ensureDir(STARS_MD_FOLDER)
+  await fs.ensureDir(JSON_CACHE_DIRECTORY)
+  await fs.ensureDir(STARS_DIRECTORY)
 
 
   const repoFilePaths = await getSavedRepoFilePaths()
@@ -434,7 +434,7 @@ function generateMarkdownTable(tableRows, sum) {
     }
   }
 
-  return markdownMagic(README_FILE, config)
+  return markdownMagic(README_FILEPATH, config)
 }
 
 // Add this helper function for date formatting
