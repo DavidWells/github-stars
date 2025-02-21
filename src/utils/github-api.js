@@ -39,6 +39,18 @@ async function getSelfStaredRepos(delayPerPage) {
   return repos
 }
 
+function extractRateLimit(headers) {
+  if (!headers) return null
+  const reset = parseInt(headers.get('x-ratelimit-reset'))
+  return {
+    limit: parseInt(headers.get('x-ratelimit-limit')),
+    remaining: parseInt(headers.get('x-ratelimit-remaining')),
+    reset: reset,
+    resetTime: new Date(reset * 1000).toISOString(),
+    used: parseInt(headers.get('x-ratelimit-used')),
+  }
+}
+
 async function getReadMe(repo = {}) {
   const repoDetails = repo.repo || repo
   const repoPath = repoDetails.full_name
@@ -55,11 +67,11 @@ async function getReadMe(repo = {}) {
     console.error(`Error checking file existence: ${err}`)
   }
 
-  // From a commit https://raw.githubusercontent.com/org/name/dc3e42769b08fb091b3258c0e7c0dfbe19b11782/README.md
+  // from a commit https://raw.githubusercontent.com/org/name/dc3e42769b08fb091b3258c0e7c0dfbe19b11782/README.md
 
   console.log(`Getting readme for ${repoPath}`)
-  const [apiError, mdFromApi] = await safe(
-    $fetch(`https://api.github.com/repos/${repoPath}/readme`, {
+  const [apiError, response] = await safe(
+    $fetch.raw(`https://api.github.com/repos/${repoPath}/readme`, {
       headers: {
         authorization: 'Bearer ' + process.env.GITHUB_TOKEN,
         accept: 'application/vnd.github.raw+json',
@@ -70,8 +82,14 @@ async function getReadMe(repo = {}) {
     })
   )
 
-  if (mdFromApi) {
-    return mdFromApi
+  let mdFromApi = null
+  let rateLimit = null
+
+  if (response) {
+    const { headers, _data } = response
+    mdFromApi = _data
+    rateLimit = extractRateLimit(headers)
+    console.log('rateLimit', rateLimit)
   }
 
   if (apiError) {
@@ -88,16 +106,17 @@ async function getReadMe(repo = {}) {
     // }
     const rawREADME = await getRawReadMe(repoDetails, 'README')
     if (rawREADME) {
-      return rawREADME
+      return { content: rawREADME, rateLimit }
     }
     const raw_readme = await getRawReadMe(repoDetails, 'readme')
     if (raw_readme) {
-      return raw_readme
+      return { content: raw_readme, rateLimit }
     }
   }
   
-  return mdFromApi
+  return { content: mdFromApi, rateLimit }
 }
+
 
 async function getRawReadMe(repo, readmeFileName = 'README.md') {
   const repoPath = repo.full_name
@@ -194,14 +213,7 @@ async function getStarredRepos(username, page = 1) {
   const links = linkHeader ? parseLinkHeader(linkHeader) : {}
   
   // Extract rate limit info from headers
-  const reset = parseInt(headers.get('x-ratelimit-reset'))
-  const rateLimit = {
-    limit: parseInt(headers.get('x-ratelimit-limit')),
-    remaining: parseInt(headers.get('x-ratelimit-remaining')),
-    reset: reset,
-    resetTime: new Date(reset * 1000).toISOString(),
-    used: parseInt(headers.get('x-ratelimit-used')),
-  }
+  const rateLimit = extractRateLimit(headers)
   
   return {
     repos: _data,
@@ -231,4 +243,5 @@ export {
   getRawReadMe,
   getRepoHash,
   getGitHashFromDate,
+  extractRateLimit,
 }
