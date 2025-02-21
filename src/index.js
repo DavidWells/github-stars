@@ -165,10 +165,10 @@ async function setup(username) {
 
   const githubStarData = await getAllStars({
     username,
-    pageStart: 35,
+    pageStart: 1,
     // maxPages: 35,
     dataFiles: alreadyProcessedStars,
-    refreshAll: true,
+    // refreshAll: true,
   })
 
   console.log('All stars found', githubStarData.repos.length)
