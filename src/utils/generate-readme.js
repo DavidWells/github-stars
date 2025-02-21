@@ -1,7 +1,7 @@
 import { markdownMagic, stringUtils } from 'markdown-magic'
 import { getSavedJSONFileData } from './fs.js'
 import { getStarCount } from './github-api.js'
-import { README_FILEPATH } from '../_constants.js'
+import { README_FILEPATH, GITHUB_USERNAME } from '../_constants.js'
 
 const EMPTY_WHITE_SPACE_CHAR = '‎'
 const BRAIL_SPACE = '⠀'
