@@ -1,5 +1,6 @@
 import { markdownMagic, stringUtils } from 'markdown-magic'
 import { getSavedJSONFileData } from './fs.js'
+import { getStarCount } from './github-api.js'
 import { README_FILEPATH } from '../_constants.js'
 
 const EMPTY_WHITE_SPACE_CHAR = '‎'
@@ -112,6 +113,11 @@ async function generateMarkdownTable(opts) {
     // debug: true,
     transforms: {
       STAR_COUNT: async function () {
+        if(process.env.GITHUB_TOKEN) {
+          const { totalStars } = await getStarCount(GITHUB_USERNAME)
+          return numberWithCommas(totalStars)
+        }
+        // Fallback to FS
         return numberWithCommas(allStars.length)
       },
       ALL_STARS_TABLE: tablePlugin(sortedByStarredDate),

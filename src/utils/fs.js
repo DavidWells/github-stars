@@ -38,6 +38,35 @@ async function getSavedJSONFilePaths() {
   return dataFiles
 }
 
+async function getSavedMdFilePaths() {
+  try {
+    // Get all .md files recursively
+    const files = await fs.readdir(STARS_DIRECTORY, { recursive: true })
+    
+    // Filter for .md files and format paths
+    const mdFiles = files
+      .filter(file => file.endsWith('.md'))
+      .map(file => {
+        // Remove .md extension
+        const withoutExt = file.slice(0, -3)
+        // Split into org/repo format
+        const [org, repo] = withoutExt.split('/')
+        return {
+          path: file,
+          fullPath: `${STARS_DIRECTORY}/${file}`,
+          org,
+          repo,
+          fullName: withoutExt
+        }
+      })
+
+    return mdFiles
+  } catch (error) {
+    console.error('Error reading saved markdown files:', error)
+    return []
+  }
+}
+
 async function getSavedJSONFileData() {
   const repoFilePaths = await getSavedJSONFilePaths()
   const repoFileData = await Promise.all(repoFilePaths.map(async (filePath) => {
@@ -110,4 +139,5 @@ export {
   getSavedJSONFileData,
   initDirectories,
   resetDirectories,
+  getSavedMdFilePaths,
 }

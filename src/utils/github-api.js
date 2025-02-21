@@ -237,6 +237,45 @@ function parseLinkHeader(header) {
   return links
 }
 
+async function getStarCount(username) {
+  const res = await $fetch.raw(`https://api.github.com/users/${username}/starred`, {
+    query: {
+      per_page: 1,
+    },
+    headers: {
+      authorization: 'Bearer ' + process.env.GITHUB_TOKEN,
+      Accept: 'application/vnd.github.v3.star+json',
+      'user-agent': 'github-stars',
+    },
+    retry: 3,
+    retryDelay: 100,
+    responseType: 'json',
+  })
+  const { headers, body } = res
+
+  const linkHeader = headers.get('link')
+  const links = linkHeader ? parseLinkHeader(linkHeader) : {}
+  // console.log('links', links)
+
+  // Get total count from last page URL if available
+  let totalStars = 0
+  if (links.last) {
+    const lastPageUrl = new URL(links.last)
+    const lastPage = parseInt(lastPageUrl.searchParams.get('page'))
+    totalStars = lastPage // GitHub's default per_page is 30
+  }
+
+  const rateLimit = extractRateLimit(headers)
+  console.log(`Remaining calls: ${rateLimit.remaining} til ${rateLimit.resetTime}`)
+  
+  return {
+    totalStars,
+    rateLimit,
+  }
+}
+
+// getStarCount('davidwells').then(console.log)
+
 export {
   getStarredRepos,
   getSelfStaredRepos,
@@ -245,4 +284,5 @@ export {
   getRepoHash,
   getGitHashFromDate,
   extractRateLimit,
+  getStarCount,
 }

@@ -9,6 +9,7 @@ import { saveToJSONFile } from './utils/generate-json.js'
 import { 
   getCleanedRepoNames, 
   getSavedJSONFileData,
+  getSavedMdFilePaths,
   initDirectories, 
   resetDirectories,
   readMesToFetch, 
@@ -157,12 +158,16 @@ async function setup(username) {
   await initDirectories()
 
   const alreadyProcessedRepoNames = await getCleanedRepoNames()
+  const savedMdFilePaths = (await getSavedMdFilePaths()).map(({ fullName }) => fullName)
+  const combined = [...alreadyProcessedRepoNames, ...savedMdFilePaths]
+  // Remove duplicates
+  const alreadyProcessedStars = combined.filter((item, index, self) => self.indexOf(item) === index)
 
   const githubStarData = await getAllStars({
     username,
-    pageStart: 30,
-    maxPages: 35,
-    dataFiles: alreadyProcessedRepoNames,
+    pageStart: 35,
+    // maxPages: 35,
+    dataFiles: alreadyProcessedStars,
     refreshAll: true,
   })
 
