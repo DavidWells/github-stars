@@ -163,7 +163,7 @@ async function setup(username) {
     pageStart: 1,
     maxPages: 30,
     dataFiles: alreadyProcessedRepoNames,
-    refreshAll: true,
+    // refreshAll: true,
   })
 
   console.log('All stars found', githubStarData.repos.length)
