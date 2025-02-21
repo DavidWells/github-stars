@@ -160,10 +160,10 @@ async function setup(username) {
 
   const githubStarData = await getAllStars({
     username,
-    pageStart: 1,
-    maxPages: 30,
+    pageStart: 30,
+    maxPages: 35,
     dataFiles: alreadyProcessedRepoNames,
-    // refreshAll: true,
+    refreshAll: true,
   })
 
   console.log('All stars found', githubStarData.repos.length)
