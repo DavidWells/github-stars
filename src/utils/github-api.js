@@ -89,7 +89,8 @@ async function getReadMe(repo = {}) {
     const { headers, _data } = response
     mdFromApi = _data
     rateLimit = extractRateLimit(headers)
-    console.log('rateLimit', rateLimit)
+    // console.log('Remaing API calls:', rateLimit.remaining)
+    console.log(`Remaining calls: ${rateLimit.remaining} til ${rateLimit.resetTime}`)
   }
 
   if (apiError) {
